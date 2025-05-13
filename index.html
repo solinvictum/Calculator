@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f5f7fa">
+    <meta name="apple-mobile-web-app-title" content="Трекер калорий">
+    <link rel="apple-touch-icon" href="icon.png">
+    <title>Трекер калорий</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Трекер БЖУ</h1>
+        
+        <div class="daily-goals">
+            <h2>Цели на день</h2>
+            <div class="input-group">
+                <input type="number" id="protein-goal" placeholder="Белки (г)">
+                <input type="number" id="carbs-goal" placeholder="Углеводы (г)">
+                <input type="number" id="fats-goal" placeholder="Жиры (г)">
+                <input type="number" id="calories-goal" placeholder="Калории (ккал)" readonly>
+                <button onclick="setDailyGoals()">Установить цели</button>
+            </div>
+        </div>
+
+        <div class="meal-tracker">
+            <h2>Добавить прием пищи</h2>
+            <div class="input-group">
+                <input type="number" id="protein-consumed" placeholder="Белки (г)">
+                <input type="number" id="carbs-consumed" placeholder="Углеводы (г)">
+                <input type="number" id="fats-consumed" placeholder="Жиры (г)">
+                <button onclick="addMeal()">Добавить</button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <h2>Прогресс</h2>
+            <div class="progress-item">
+                <label>Белки:</label>
+                <div class="progress-bar">
+                    <div id="protein-progress" class="progress-fill"></div>
+                </div>
+                <span id="protein-text">0/0 г (0%)</span>
+            </div>
+            <div class="progress-item">
+                <label>Углеводы:</label>
+                <div class="progress-bar">
+                    <div id="carbs-progress" class="progress-fill"></div>
+                </div>
+                <span id="carbs-text">0/0 г (0%)</span>
+            </div>
+            <div class="progress-item">
+                <label>Жиры:</label>
+                <div class="progress-bar">
+                    <div id="fats-progress" class="progress-fill"></div>
+                </div>
+                <span id="fats-text">0/0 г (0%)</span>
+            </div>
+            <div class="progress-item">
+                <label>Калории:</label>
+                <div class="progress-bar">
+                    <div id="calories-progress" class="progress-fill"></div>
+                </div>
+                <span id="calories-text">0/0 ккал (0%)</span>
+            </div>
+            <button onclick="resetAll()" class="reset-button">Сбросить все значения</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
