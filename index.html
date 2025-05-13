@@ -22,7 +22,7 @@
                 <input type="number" id="carbs-goal" placeholder="Углеводы (г)">
                 <input type="number" id="fats-goal" placeholder="Жиры (г)">
                 <input type="number" id="calories-goal" placeholder="Калории (ккал)" readonly>
-                <button onclick="setDailyGoals()">Установить цели</button>
+                <button id="set-goals-btn">Установить цели</button>
             </div>
         </div>
 
@@ -32,7 +32,7 @@
                 <input type="number" id="protein-consumed" placeholder="Белки (г)">
                 <input type="number" id="carbs-consumed" placeholder="Углеводы (г)">
                 <input type="number" id="fats-consumed" placeholder="Жиры (г)">
-                <button onclick="addMeal()">Добавить</button>
+                <button id="add-meal-btn">Добавить</button>
             </div>
         </div>
 
@@ -43,32 +43,66 @@
                 <div class="progress-bar">
                     <div id="protein-progress" class="progress-fill"></div>
                 </div>
-                <span id="protein-text">0/0 г (0%)</span>
+                <span id="protein-text">0/0 г (0%) <br><strong>Осталось: 0 г</strong></span>
             </div>
+            
             <div class="progress-item">
                 <label>Углеводы:</label>
                 <div class="progress-bar">
                     <div id="carbs-progress" class="progress-fill"></div>
                 </div>
-                <span id="carbs-text">0/0 г (0%)</span>
+                <span id="carbs-text">0/0 г (0%) <br><strong>Осталось: 0 г</strong></span>
             </div>
+            
             <div class="progress-item">
                 <label>Жиры:</label>
                 <div class="progress-bar">
                     <div id="fats-progress" class="progress-fill"></div>
                 </div>
-                <span id="fats-text">0/0 г (0%)</span>
+                <span id="fats-text">0/0 г (0%) <br><strong>Осталось: 0 г</strong></span>
             </div>
+            
             <div class="progress-item">
                 <label>Калории:</label>
                 <div class="progress-bar">
                     <div id="calories-progress" class="progress-fill"></div>
                 </div>
-                <span id="calories-text">0/0 ккал (0%)</span>
+                <span id="calories-text">0/0 ккал (0%) <br><strong>Осталось: 0 ккал</strong></span>
             </div>
-            <button onclick="resetAll()" class="reset-button">Сбросить все значения</button>
         </div>
+
+        <button id="reset-btn" class="reset-button">Сбросить все значения</button>
     </div>
-    <script src="script.js"></script>
+
+<!-- Подключаем Firebase -->
+<script type="module">
+    // Импортируем необходимые модули Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    // Конфигурация Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAJWjyW0xBgTzG-W4JIDmEhQaNXDN_YN5Q",
+        authDomain: "calories-tracker-37361.firebaseapp.com",
+        projectId: "calories-tracker-37361",
+        storageBucket: "calories-tracker-37361.firebasestorage.app",
+        messagingSenderId: "262358420064",
+        appId: "1:262358420064:web:a54b6cb7cd0c8954ba5105",
+        measurementId: "G-YC4EKZ772C"
+    };
+
+    // Инициализируем Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Делаем Firebase доступным глобально
+    window.db = db;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.getDoc = getDoc;
+</script>
+
+<!-- Подключаем наш скрипт -->
+<script src="script.js"></script>
 </body>
 </html>
