@@ -10,6 +10,8 @@
     <link rel="apple-touch-icon" href="icon.png">
     <title>Трекер калорий</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -74,35 +76,13 @@
         <button id="reset-btn" class="reset-button">Сбросить все значения</button>
     </div>
 
-<!-- Подключаем Firebase -->
-<script type="module">
-    // Импортируем необходимые модули Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
-    // Конфигурация Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyAJWjyW0xBgTzG-W4JIDmEhQaNXDN_YN5Q",
-        authDomain: "calories-tracker-37361.firebaseapp.com",
-        projectId: "calories-tracker-37361",
-        storageBucket: "calories-tracker-37361.firebasestorage.app",
-        messagingSenderId: "262358420064",
-        appId: "1:262358420064:web:a54b6cb7cd0c8954ba5105",
-        measurementId: "G-YC4EKZ772C"
-    };
-
-    // Инициализируем Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Делаем Firebase доступным глобально
-    window.db = db;
-    window.doc = doc;
-    window.setDoc = setDoc;
-    window.getDoc = getDoc;
-</script>
+<!-- Индикатор загрузки -->
+<div id="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Загрузка данных...</p>
+</div>
 
 <!-- Подключаем наш скрипт -->
-<script src="script.js"></script>
+<script src="script.js" type="module"></script>
 </body>
 </html>
