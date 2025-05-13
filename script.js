@@ -15,12 +15,14 @@ let consumed = {
 
 // Функция установки дневных целей
 function setDailyGoals() {
+    console.log('setDailyGoals вызвана'); // Для отладки
+    
     // Получаем значения из полей ввода
     dailyGoals.protein = Number(document.getElementById('protein-goal').value) || 0;
     dailyGoals.carbs = Number(document.getElementById('carbs-goal').value) || 0;
     dailyGoals.fats = Number(document.getElementById('fats-goal').value) || 0;
     
-    // Автоматический расчет калорий (4 ккал на 1г белка, 4 ккал на 1г углеводов, 9 ккал на 1г жиров)
+    // Автоматический расчет калорий
     dailyGoals.calories = Math.round((dailyGoals.protein * 4) + (dailyGoals.carbs * 4) + (dailyGoals.fats * 9));
     document.getElementById('calories-goal').value = dailyGoals.calories;
     
@@ -28,11 +30,12 @@ function setDailyGoals() {
     consumed.calories = 0;
     
     updateProgress();
-    saveToLocalStorage();
 }
 
 // Функция добавления приема пищи
 function addMeal() {
+    console.log('addMeal вызвана'); // Для отладки
+    
     // Получаем значения из полей ввода
     const protein = Number(document.getElementById('protein-consumed').value) || 0;
     const carbs = Number(document.getElementById('carbs-consumed').value) || 0;
@@ -50,11 +53,12 @@ function addMeal() {
     document.getElementById('fats-consumed').value = '';
     
     updateProgress();
-    saveToLocalStorage();
 }
 
 // Функция обновления прогресс-баров
 function updateProgress() {
+    console.log('updateProgress вызвана'); // Для отладки
+    
     // Обновляем прогресс белков
     const proteinPercentage = (consumed.protein / dailyGoals.protein) * 100;
     const proteinRemaining = dailyGoals.protein - consumed.protein;
@@ -84,37 +88,10 @@ function updateProgress() {
         `${consumed.calories}/${dailyGoals.calories} ккал (${Math.round(caloriesPercentage)}%) <br><strong>Осталось: ${caloriesRemaining} ккал</strong>`;
 }
 
-// Функция сохранения данных в localStorage
-function saveToLocalStorage() {
-    localStorage.setItem('dailyGoals', JSON.stringify(dailyGoals));
-    localStorage.setItem('consumed', JSON.stringify(consumed));
-}
-
-// Функция загрузки данных из localStorage
-function loadFromLocalStorage() {
-    const savedGoals = localStorage.getItem('dailyGoals');
-    const savedConsumed = localStorage.getItem('consumed');
-    
-    if (savedGoals) {
-        dailyGoals = JSON.parse(savedGoals);
-        document.getElementById('protein-goal').value = dailyGoals.protein;
-        document.getElementById('carbs-goal').value = dailyGoals.carbs;
-        document.getElementById('fats-goal').value = dailyGoals.fats;
-        document.getElementById('calories-goal').value = dailyGoals.calories;
-    }
-    
-    if (savedConsumed) {
-        consumed = JSON.parse(savedConsumed);
-    }
-    
-    updateProgress();
-}
-
-// Загружаем сохраненные данные при загрузке страницы
-window.onload = loadFromLocalStorage;
-
 // Функция сброса всех значений
 function resetAll() {
+    console.log('resetAll вызвана'); // Для отладки
+    
     // Сбрасываем цели
     dailyGoals = {
         protein: 0,
@@ -144,8 +121,91 @@ function resetAll() {
     
     // Обновляем прогресс-бары
     updateProgress();
-    
-    // Очищаем localStorage
-    localStorage.removeItem('dailyGoals');
-    localStorage.removeItem('consumed');
 }
+
+// Добавляем обработчики событий
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM загружен'); // Для отладки
+    
+    const setGoalsBtn = document.getElementById('set-goals-btn');
+    const addMealBtn = document.getElementById('add-meal-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    
+    console.log('Кнопки найдены:', { setGoalsBtn, addMealBtn, resetBtn }); // Для отладки
+    
+    setGoalsBtn.addEventListener('click', setDailyGoals);
+    addMealBtn.addEventListener('click', addMeal);
+    resetBtn.addEventListener('click', resetAll);
+});
+// Функция сохранения данных в Firebase
+async function saveToFirebase() {
+    try {
+        const userDoc = doc(db, 'users', 'current_user');
+        await setDoc(userDoc, {
+            dailyGoals,
+            consumed,
+            lastUpdated: new Date().toISOString()
+        });
+        console.log('Данные сохранены в Firebase');
+    } catch (error) {
+        console.error('Ошибка при сохранении в Firebase:', error);
+    }
+}
+
+// Функция загрузки данных из Firebase
+async function loadFromFirebase() {
+    try {
+        const userDoc = doc(db, 'users', 'current_user');
+        const docSnap = await getDoc(userDoc);
+        
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            dailyGoals = data.dailyGoals || dailyGoals;
+            consumed = data.consumed || consumed;
+            
+            // Обновляем поля ввода
+            document.getElementById('protein-goal').value = dailyGoals.protein;
+            document.getElementById('carbs-goal').value = dailyGoals.carbs;
+            document.getElementById('fats-goal').value = dailyGoals.fats;
+            document.getElementById('calories-goal').value = dailyGoals.calories;
+            
+            // Обновляем прогресс-бары
+            updateProgress();
+            console.log('Данные загружены из Firebase');
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке из Firebase:', error);
+    }
+}
+
+// Обновляем существующие функции, добавляя сохранение в Firebase
+function setDailyGoals() {
+    // ... существующий код ...
+    saveToFirebase(); // Добавляем сохранение
+}
+
+function addMeal() {
+    // ... существующий код ...
+    saveToFirebase(); // Добавляем сохранение
+}
+
+function resetAll() {
+    // ... существующий код ...
+    saveToFirebase(); // Добавляем сохранение
+}
+
+// Обновляем обработчик DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM загружен');
+    
+    const setGoalsBtn = document.getElementById('set-goals-btn');
+    const addMealBtn = document.getElementById('add-meal-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    
+    setGoalsBtn.addEventListener('click', setDailyGoals);
+    addMealBtn.addEventListener('click', addMeal);
+    resetBtn.addEventListener('click', resetAll);
+    
+    // Загружаем данные при загрузке страницы
+    loadFromFirebase();
+});
