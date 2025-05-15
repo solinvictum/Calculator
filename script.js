@@ -1,5 +1,17 @@
-// Импортируем необходимые функции из firebase-config.js
-import { db, doc, setDoc, getDoc } from './firebase-config.js';
+// Ждем инициализации Firebase
+function waitForFirebase() {
+    return new Promise((resolve) => {
+        const check = () => {
+            if (window.db && window.doc && window.setDoc && window.getDoc) {
+                const { db, doc, setDoc, getDoc } = window;
+                resolve({ db, doc, setDoc, getDoc });
+            } else {
+                setTimeout(check, 100);
+            }
+        };
+        check();
+    });
+}
 
 // Инициализация объектов для хранения целей и потребленных значений
 let dailyGoals = {
@@ -16,6 +28,9 @@ let consumed = {
     calories: 0
 };
 
+// Глобальные переменные для Firebase
+let db, doc, setDoc, getDoc;
+
 // Флаг для отслеживания инициализации
 let isInitialized = false;
 
@@ -27,6 +42,28 @@ function setLoading(show) {
     }
 }
 
+// Функция определения операционной системы
+function getOperatingSystem() {
+    const userAgent = window.navigator.userAgent;
+    const platform = window.navigator.platform;
+    const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];
+    const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
+    
+    if (macosPlatforms.indexOf(platform) !== -1) {
+        return 'MacOS';
+    } else if (iosPlatforms.indexOf(platform) !== -1) {
+        return 'iOS';
+    } else if (platform.indexOf('Win') !== -1) {
+        return 'Windows';
+    } else if (/Android/.test(userAgent)) {
+        return 'Android';
+    } else if (/Linux/.test(platform)) {
+        return 'Linux';
+    }
+    
+    return 'Unknown';
+}
+
 // Функция сохранения данных в Firebase
 async function saveToFirebase() {
     if (!isInitialized) return;
@@ -36,7 +73,9 @@ async function saveToFirebase() {
         await setDoc(userDoc, {
             dailyGoals,
             consumed,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
+            system: getOperatingSystem(),
+            userAgent: window.navigator.userAgent
         }, { merge: true });
         console.log('Данные сохранены в Firebase');
     } catch (error) {
@@ -205,13 +244,48 @@ async function resetAll() {
     await saveToFirebase();
 }
 
+// Функция определения текущей темы
+function getSystemTheme() {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+    }
+    return 'light';
+}
+
+// Функция применения темы
+function applyTheme(theme) {
+    document.body.classList.remove('theme-light', 'theme-dark');
+    document.body.classList.add(`theme-${theme}`);
+    
+    // Обновляем информацию в интерфейсе
+    const osType = document.getElementById('os-type');
+    if (osType) {
+        osType.textContent = `${getOperatingSystem()} (${theme})`;
+    }
+}
+
 // Инициализация приложения
 async function initApp() {
     setLoading(true);
     try {
+        // Ждем инициализации Firebase
+        const firebase = await waitForFirebase();
+        ({ db, doc, setDoc, getDoc } = firebase);
+        
         await loadFromFirebase();
         isInitialized = true;
         updateProgress();
+        
+        // Обновляем информацию об ОС и теме
+        const currentTheme = getSystemTheme();
+        applyTheme(currentTheme);
+        
+        // Добавляем слушатель изменения темы
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            const newTheme = e.matches ? 'dark' : 'light';
+            applyTheme(newTheme);
+        });
+        
     } catch (error) {
         console.error('Ошибка при инициализации:', error);
         alert('Не удалось загрузить данные. Проверьте подключение к интернету.');

@@ -1,17 +1,57 @@
+/* Блокируем нежелательные шрифты */
+@font-face {
+    font-family: 'AtlassianSans';
+    src: local('Inter');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'AtlassianSans-latin';
+    src: local('Inter');
+    font-display: swap;
+}
+
+/* Подключение шрифтов */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DM Sans';
+    src: url('fonts/DMSans-VariableFont_opsz,wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* Сброс стилей и базовые настройки */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: inherit;
 }
 
 /* Основные стили страницы */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     color: #2c3e50;
     min-height: 100vh;
     padding: 2rem 1rem;
+    line-height: 1.6;
 }
 
 /* Основной контейнер */
@@ -25,11 +65,70 @@ body {
     backdrop-filter: blur(10px);
 }
 
+/* Переменные для светлой темы */
+:root {
+    --font-heading: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-numbers: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    
+    --bg-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --container-bg: rgba(255, 255, 255, 0.95);
+    --text-color: #2c3e50;
+    --text-color-secondary: #34495e;
+    --input-bg: #f8f9fa;
+    --border-color: #e0e0e0;
+    --progress-bg: #f0f0f0;
+    --progress-fill: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+    --heading-color: #2c3e50;
+    --label-color: #2c3e50;
+}
+
+/* Переменные для темной темы */
+.theme-dark {
+    --bg-color: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --container-bg: rgba(26, 26, 46, 0.95);
+    --text-color: #e2e8f0;
+    --text-color-secondary: #a0aec0;
+    --input-bg: #2d3748;
+    --border-color: #4a5568;
+    --progress-bg: #2d3748;
+    --progress-fill: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+    --heading-color: #f1f5f9;
+    --label-color: #e2e8f0;
+}
+
+/* Применение шрифтов */
+h1, h2 {
+    font-family: var(--font-heading) !important;
+}
+
+body, input, button {
+    font-family: var(--font-body) !important;
+}
+
+.progress-item span,
+.progress-item strong,
+input[type="number"] {
+    font-family: var(--font-numbers) !important;
+}
+
+/* Принудительно отключаем Atlassian Sans */
+* {
+    font-family: inherit;
+}
+
+*[class*="atlassian"],
+*[class*="Atlassian"],
+*[id*="atlassian"],
+*[id*="Atlassian"] {
+    font-family: var(--font-body) !important;
+}
+
 /* Заголовки */
 h1 {
     text-align: center;
     margin-bottom: 2rem;
-    color: #2c3e50;
+    color: var(--heading-color);
     font-size: 2.5rem;
     font-weight: 600;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -37,7 +136,7 @@ h1 {
 
 h2 {
     margin-bottom: 1.5rem;
-    color: #34495e;
+    color: var(--heading-color);
     font-size: 1.5rem;
     font-weight: 500;
 }
@@ -60,6 +159,8 @@ input {
     font-size: 1rem;
     transition: all 0.3s ease;
     background-color: #f8f9fa;
+    font-weight: 400;
+    color: var(--text-color);
 }
 
 input:focus {
@@ -77,6 +178,11 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
     -moz-appearance: textfield;
+}
+
+input::placeholder {
+    color: var(--text-color-secondary);
+    opacity: 0.7;
 }
 
 /* Стили для кнопок */
@@ -144,8 +250,8 @@ button:active {
 
 /* Текстовые элементы прогресса */
 label {
-    font-weight: 600;
-    color: #2c3e50;
+    font-weight: 500;
+    color: var(--label-color);
     font-size: 1.1rem;
 }
 
@@ -153,12 +259,13 @@ label {
     display: block;
     margin-top: 0.5rem;
     line-height: 1.6;
-    color: #34495e;
+    color: var(--text-color);
 }
 
 .progress-item strong {
-    color: #2c3e50;
+    color: var(--text-color);
     font-size: 1.1rem;
+    font-weight: 700;
 }
 
 /* Индикатор загрузки */
@@ -214,4 +321,74 @@ label {
     input, button {
         width: 100%;
     }
+}
+
+/* Стили для информации о системе */
+.system-info {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.system-info span {
+    font-weight: 500;
+    color: #3498db;
+}
+
+/* Темная тема - дополнительные стили */
+.theme-dark .system-info {
+    background: rgba(52, 152, 219, 0.15);
+}
+
+.theme-dark .system-info span {
+    color: #60a5fa;
+}
+
+.theme-dark button {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.theme-dark .reset-button {
+    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+}
+
+/* Применяем переменные */
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.container {
+    background-color: var(--container-bg);
+}
+
+input {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.progress-bar {
+    background-color: var(--progress-bg);
+}
+
+.progress-fill {
+    background: var(--progress-fill);
+}
+
+/* Дополнительные стили для темной темы */
+.theme-dark .system-info {
+    background: rgba(52, 152, 219, 0.2);
+}
+
+.theme-dark input::placeholder {
+    color: #bdc3c7;
+}
+
+.theme-dark .loading-overlay {
+    background-color: rgba(44, 62, 80, 0.9);
 }

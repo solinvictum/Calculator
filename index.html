@@ -7,15 +7,25 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#f5f7fa">
     <meta name="apple-mobile-web-app-title" content="Трекер калорий">
+    <meta http-equiv="Content-Security-Policy" content="font-src 'self' data:; style-src 'self' 'unsafe-inline';">
+    
+    <!-- Предзагрузка шрифтов -->
+    <link rel="preload" href="fonts/Montserrat-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="fonts/DMSans-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
+    
     <link rel="apple-touch-icon" href="icon.png">
     <title>Трекер калорий</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Firebase SDK -->
-    <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Трекер БЖУ</h1>
+        
+        <!-- Добавляем блок для отображения ОС -->
+        <div id="system-info" class="system-info">
+            Ваша система: <span id="os-type">определяется...</span>
+        </div>
         
         <div class="daily-goals">
             <h2>Цели на день</h2>
@@ -82,7 +92,8 @@
     <p>Загрузка данных...</p>
 </div>
 
-<!-- Подключаем наш скрипт -->
-<script src="script.js" type="module"></script>
+<!-- Подключаем скрипты -->
+<script src="firebase-config.js" type="module"></script>
+<script src="script.js" type="module" defer></script>
 </body>
 </html>
