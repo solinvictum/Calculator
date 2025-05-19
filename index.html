@@ -29,12 +29,30 @@
         
         <div class="daily-goals">
             <h2>Цели на день</h2>
-            <div class="input-group">
-                <input type="number" id="protein-goal" placeholder="Белки (г)">
-                <input type="number" id="carbs-goal" placeholder="Углеводы (г)">
-                <input type="number" id="fats-goal" placeholder="Жиры (г)">
-                <input type="number" id="calories-goal" placeholder="Калории (ккал)" readonly>
-                <button id="set-goals-btn">Установить цели</button>
+            <div class="preset-buttons">
+                <div class="preset-button" id="training-day-preset">
+                    <button id="training-day-btn">Тренировочный день</button>
+                    <span class="edit-icon" id="edit-training-day">✏️</span>
+                </div>
+                <div class="preset-button" id="rest-day-preset">
+                    <button id="rest-day-btn">День отдыха</button>
+                    <span class="edit-icon" id="edit-rest-day">✏️</span>
+                </div>
+            </div>
+            
+            <!-- Скрытая форма для редактирования пресета -->
+            <div class="preset-edit-form" id="preset-edit-form">
+                <h3 id="preset-edit-title">Изменить пресет</h3>
+                <div class="input-group">
+                    <input type="number" id="preset-protein" placeholder="Белки (г)">
+                    <input type="number" id="preset-carbs" placeholder="Углеводы (г)">
+                    <input type="number" id="preset-fats" placeholder="Жиры (г)">
+                    <input type="number" id="preset-calories" placeholder="Калории (ккал)" readonly>
+                </div>
+                <div class="edit-buttons">
+                    <button id="save-preset-btn">Сохранить</button>
+                    <button id="cancel-preset-btn">Отмена</button>
+                </div>
             </div>
         </div>
 

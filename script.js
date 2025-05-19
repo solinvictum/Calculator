@@ -28,6 +28,25 @@ let consumed = {
     calories: 0
 };
 
+// Объект для хранения пресетов
+let presets = {
+    trainingDay: {
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+        calories: 0
+    },
+    restDay: {
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+        calories: 0
+    }
+};
+
+// Текущий редактируемый пресет
+let currentEditingPreset = null;
+
 // Глобальные переменные для Firebase
 let db, doc, setDoc, getDoc;
 
@@ -73,6 +92,7 @@ async function saveToFirebase() {
         await setDoc(userDoc, {
             dailyGoals,
             consumed,
+            presets,
             lastUpdated: new Date().toISOString(),
             system: getOperatingSystem(),
             userAgent: window.navigator.userAgent
@@ -101,11 +121,11 @@ async function loadFromFirebase() {
                 Object.assign(consumed, data.consumed);
             }
             
-            // Обновляем поля ввода
-            document.getElementById('protein-goal').value = dailyGoals.protein || '';
-            document.getElementById('carbs-goal').value = dailyGoals.carbs || '';
-            document.getElementById('fats-goal').value = dailyGoals.fats || '';
-            document.getElementById('calories-goal').value = dailyGoals.calories || '';
+            if (data.presets) {
+                Object.assign(presets, data.presets);
+                // Обновляем текст кнопок пресетов с актуальными значениями
+                updatePresetButtonText();
+            }
             
             console.log('Данные загружены из Firebase');
             return true;
@@ -156,29 +176,6 @@ function updateProgress() {
         document.getElementById('calories-text').innerHTML = 
             `${consumed.calories}/${dailyGoals.calories} ккал (${Math.round(caloriesPercentage)}%) <br><strong>Осталось: ${caloriesRemaining} ккал</strong>`;
     }
-}
-
-// Функция установки дневных целей
-async function setDailyGoals() {
-    console.log('setDailyGoals вызвана');
-    
-    // Получаем значения из полей ввода
-    dailyGoals.protein = Number(document.getElementById('protein-goal').value) || 0;
-    dailyGoals.carbs = Number(document.getElementById('carbs-goal').value) || 0;
-    dailyGoals.fats = Number(document.getElementById('fats-goal').value) || 0;
-    
-    // Автоматический расчет калорий
-    dailyGoals.calories = Math.round((dailyGoals.protein * 4) + (dailyGoals.carbs * 4) + (dailyGoals.fats * 9));
-    document.getElementById('calories-goal').value = dailyGoals.calories;
-    
-    // Сбрасываем потребленные значения при установке новых целей
-    consumed.protein = 0;
-    consumed.carbs = 0;
-    consumed.fats = 0;
-    consumed.calories = 0;
-    
-    updateProgress();
-    await saveToFirebase();
 }
 
 // Функция добавления приема пищи
@@ -252,6 +249,126 @@ function getSystemTheme() {
     return 'light';
 }
 
+// Функция обновления текста на кнопках пресетов
+function updatePresetButtonText() {
+    const trainingDayBtn = document.getElementById('training-day-btn');
+    const restDayBtn = document.getElementById('rest-day-btn');
+    
+    if (presets.trainingDay.protein > 0 || presets.trainingDay.carbs > 0 || presets.trainingDay.fats > 0) {
+        trainingDayBtn.innerText = `Тренировочный день (Б: ${presets.trainingDay.protein}г, У: ${presets.trainingDay.carbs}г, Ж: ${presets.trainingDay.fats}г)`;
+    } else {
+        trainingDayBtn.innerText = 'Тренировочный день';
+    }
+    
+    if (presets.restDay.protein > 0 || presets.restDay.carbs > 0 || presets.restDay.fats > 0) {
+        restDayBtn.innerText = `День отдыха (Б: ${presets.restDay.protein}г, У: ${presets.restDay.carbs}г, Ж: ${presets.restDay.fats}г)`;
+    } else {
+        restDayBtn.innerText = 'День отдыха';
+    }
+}
+
+// Функция применения пресета
+function applyPreset(presetType) {
+    if (presetType === 'trainingDay') {
+        dailyGoals.protein = presets.trainingDay.protein;
+        dailyGoals.carbs = presets.trainingDay.carbs;
+        dailyGoals.fats = presets.trainingDay.fats;
+    } else if (presetType === 'restDay') {
+        dailyGoals.protein = presets.restDay.protein;
+        dailyGoals.carbs = presets.restDay.carbs;
+        dailyGoals.fats = presets.restDay.fats;
+    }
+    
+    // Автоматический расчет калорий
+    dailyGoals.calories = Math.round((dailyGoals.protein * 4) + (dailyGoals.carbs * 4) + (dailyGoals.fats * 9));
+    
+    // Сбрасываем потребленные значения при установке новых целей
+    consumed.protein = 0;
+    consumed.carbs = 0;
+    consumed.fats = 0;
+    consumed.calories = 0;
+    
+    updateProgress();
+    saveToFirebase();
+}
+
+// Функция показа формы редактирования пресета
+function showPresetEditForm(presetType) {
+    currentEditingPreset = presetType;
+    const presetEditForm = document.getElementById('preset-edit-form');
+    const presetEditTitle = document.getElementById('preset-edit-title');
+    
+    let presetData;
+    let titleText;
+    
+    if (presetType === 'trainingDay') {
+        presetData = presets.trainingDay;
+        titleText = 'Изменить пресет "Тренировочный день"';
+    } else if (presetType === 'restDay') {
+        presetData = presets.restDay;
+        titleText = 'Изменить пресет "День отдыха"';
+    }
+    
+    document.getElementById('preset-protein').value = presetData.protein || '';
+    document.getElementById('preset-carbs').value = presetData.carbs || '';
+    document.getElementById('preset-fats').value = presetData.fats || '';
+    document.getElementById('preset-calories').value = presetData.calories || '';
+    
+    presetEditTitle.textContent = titleText;
+    presetEditForm.style.display = 'block';
+    presetEditForm.classList.remove('slideUp');
+    
+    // Автоматический расчет калорий при вводе БЖУ
+    const proteinInput = document.getElementById('preset-protein');
+    const carbsInput = document.getElementById('preset-carbs');
+    const fatsInput = document.getElementById('preset-fats');
+    const caloriesInput = document.getElementById('preset-calories');
+    
+    const calculateCalories = () => {
+        const protein = Number(proteinInput.value) || 0;
+        const carbs = Number(carbsInput.value) || 0;
+        const fats = Number(fatsInput.value) || 0;
+        const calories = Math.round((protein * 4) + (carbs * 4) + (fats * 9));
+        caloriesInput.value = calories;
+    };
+    
+    proteinInput.addEventListener('input', calculateCalories);
+    carbsInput.addEventListener('input', calculateCalories);
+    fatsInput.addEventListener('input', calculateCalories);
+}
+
+// Функция сохранения пресета
+function savePreset() {
+    const protein = Number(document.getElementById('preset-protein').value) || 0;
+    const carbs = Number(document.getElementById('preset-carbs').value) || 0;
+    const fats = Number(document.getElementById('preset-fats').value) || 0;
+    const calories = Math.round((protein * 4) + (carbs * 4) + (fats * 9));
+    
+    if (currentEditingPreset === 'trainingDay') {
+        presets.trainingDay = { protein, carbs, fats, calories };
+    } else if (currentEditingPreset === 'restDay') {
+        presets.restDay = { protein, carbs, fats, calories };
+    }
+    
+    hidePresetEditForm();
+    updatePresetButtonText();
+    saveToFirebase();
+}
+
+// Функция скрытия формы редактирования пресета
+function hidePresetEditForm() {
+    const presetEditForm = document.getElementById('preset-edit-form');
+    presetEditForm.classList.add('slideUp');
+    
+    // После завершения анимации скрываем форму
+    setTimeout(() => {
+        presetEditForm.style.display = 'none';
+        presetEditForm.classList.remove('slideUp');
+    }, 300);
+    
+    currentEditingPreset = null;
+}
+
 // Функция применения темы
 function applyTheme(theme) {
     document.body.classList.remove('theme-light', 'theme-dark');
@@ -298,17 +415,47 @@ async function initApp() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM загружен');
     
-    const setGoalsBtn = document.getElementById('set-goals-btn');
+    // Находим элементы в DOM
+    const trainingDayBtn = document.getElementById('training-day-btn');
+    const restDayBtn = document.getElementById('rest-day-btn');
+    const editTrainingDayBtn = document.getElementById('edit-training-day');
+    const editRestDayBtn = document.getElementById('edit-rest-day');
+    const savePresetBtn = document.getElementById('save-preset-btn');
+    const cancelPresetBtn = document.getElementById('cancel-preset-btn');
     const addMealBtn = document.getElementById('add-meal-btn');
     const resetBtn = document.getElementById('reset-btn');
     
-    console.log('Кнопки найдены:', { setGoalsBtn, addMealBtn, resetBtn });
+    console.log('Кнопки найдены:', { 
+        trainingDayBtn,
+        restDayBtn,
+        editTrainingDayBtn,
+        editRestDayBtn,
+        savePresetBtn,
+        cancelPresetBtn,
+        addMealBtn,
+        resetBtn 
+    });
     
     // Инициализация приложения
     initApp();
     
     // Добавляем обработчики
-    setGoalsBtn.addEventListener('click', setDailyGoals);
+    trainingDayBtn.addEventListener('click', () => applyPreset('trainingDay'));
+    restDayBtn.addEventListener('click', () => applyPreset('restDay'));
+    
+    editTrainingDayBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Предотвращаем всплытие события клика
+        showPresetEditForm('trainingDay');
+    });
+    
+    editRestDayBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Предотвращаем всплытие события клика
+        showPresetEditForm('restDay');
+    });
+    
+    savePresetBtn.addEventListener('click', savePreset);
+    cancelPresetBtn.addEventListener('click', hidePresetEditForm);
+    
     addMealBtn.addEventListener('click', addMeal);
     resetBtn.addEventListener('click', resetAll);
 });
