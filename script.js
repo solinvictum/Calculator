@@ -226,12 +226,6 @@ async function resetAll() {
         calories: 0
     };
     
-    // Очищаем поля ввода целей
-    document.getElementById('protein-goal').value = '';
-    document.getElementById('carbs-goal').value = '';
-    document.getElementById('fats-goal').value = '';
-    document.getElementById('calories-goal').value = '';
-    
     // Очищаем поля ввода потребления
     document.getElementById('protein-consumed').value = '';
     document.getElementById('carbs-consumed').value = '';
@@ -458,4 +452,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     addMealBtn.addEventListener('click', addMeal);
     resetBtn.addEventListener('click', resetAll);
+    
+    // Добавляем обработчики для полей ввода (обработка нажатия Enter)
+    const proteinInput = document.getElementById('protein-consumed');
+    const carbsInput = document.getElementById('carbs-consumed');
+    const fatsInput = document.getElementById('fats-consumed');
+    
+    // Функция для обработки нажатия клавиши Enter
+    const handleEnterKey = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Предотвращаем стандартное действие
+            addMeal(); // Вызываем функцию добавления приёма пищи
+        }
+    };
+    
+    // Добавляем обработчики для каждого поля ввода
+    proteinInput.addEventListener('keypress', handleEnterKey);
+    carbsInput.addEventListener('keypress', handleEnterKey);
+    fatsInput.addEventListener('keypress', handleEnterKey);
 });
